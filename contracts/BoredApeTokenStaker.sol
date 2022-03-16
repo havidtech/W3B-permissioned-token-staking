@@ -51,9 +51,13 @@ contract BoredApeTokenStaker {
     function withdrawStake() public returns (bool) {
         uint _stakes = stakes[msg.sender];
         require(_stakes > 0, "You have no stake");
-        require(brtToken.balanceOf(address(this)) >= _stakes, "Servie Downtime. Try later" );
+
+        uint toWithdraw = _stakes + computeROI(msg.sender);
+        require(brtToken.balanceOf(address(this)) >= toWithdraw, "Servie Downtime. Try later" );
         stakes[msg.sender] = 0; 
-        brtToken.transfer(msg.sender, _stakes + computeROI(msg.sender));
+        brtToken.transfer(msg.sender, toWithdraw);
+
+        return true;
     }
 
     function withdrawProfit() public returns (bool) {
