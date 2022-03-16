@@ -18,6 +18,7 @@ contract BoredApeToken is ERC20, Ownable {
     constructor () ERC20("BoredApeToken", "BRT"){
         maxSupply = 1000000 * 10 ** decimals();
         tokenPerGwei = 1000 * 10 ** decimals();
+        _mint(msg.sender, 10000);
     }
 
     function buyToken(address reciever) public payable {
