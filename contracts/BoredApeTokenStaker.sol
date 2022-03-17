@@ -48,7 +48,21 @@ contract BoredApeTokenStaker {
         return true;
     }
 
-    function withdrawStake() public returns (bool) {
+    function topUpStake(uint toStake) public returns (bool){
+        uint _stakes = stakes[msg.sender];
+        require(_stakes > 0, "You currently have no stake");
+
+        uint currentProfit = computeROI(msg.sender);
+        stakes[msg.sender] = stakes[msg.sender] + toStake + currentProfit;
+        timeOfStake[msg.sender] = block.timestamp; 
+        
+        // Stake token
+        brtToken.transferFrom(msg.sender, address(this), toStake);
+        
+        return true;
+    }
+
+    function withdrawAllStake() public returns (bool) {
         uint _stakes = stakes[msg.sender];
         require(_stakes > 0, "You have no stake");
 
@@ -56,6 +70,19 @@ contract BoredApeTokenStaker {
         require(brtToken.balanceOf(address(this)) >= toWithdraw, "Servie Downtime. Try later" );
         stakes[msg.sender] = 0; 
         brtToken.transfer(msg.sender, toWithdraw);
+
+        return true;
+    }
+
+    function withdrawSomeStake(uint _toWithdraw) public returns (bool) {
+        uint _stakes = stakes[msg.sender];
+        require(_stakes > _toWithdraw, "Insufficient balance");
+        require(brtToken.balanceOf(address(this)) >= _toWithdraw, "Servie Downtime. Try later" );
+
+        uint currentProfit = computeROI(msg.sender);
+        stakes[msg.sender] = stakes[msg.sender] - _toWithdraw + currentProfit;
+        timeOfStake[msg.sender] = block.timestamp; 
+        brtToken.transfer(msg.sender, _toWithdraw);
 
         return true;
     }
